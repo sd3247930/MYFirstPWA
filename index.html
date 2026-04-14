@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>设备校验提醒器</title>
+    <!-- PWA 相关 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="校验提醒">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: system-ui, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #1e293b;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sub {
+            color: #475569;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 12px;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            align-items: flex-end;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 120px;
+        }
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            background: white;
+            font-family: inherit;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        button:hover { background: #2563eb; }
+        .btn-danger {
+            background: #ef4444;
+        }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-outline {
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #1e293b;
+        }
+        .device-list {
+            margin-top: 10px;
+        }
+        .device-item {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            border-left: 5px solid #94a3b8;
+        }
+        .device-item.warning {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+        .device-item.urgent {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .device-info {
+            flex: 3;
+        }
+        .device-name {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .device-date {
+            font-size: 0.8rem;
+            color: #475569;
+        }
+        .device-status {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 40px;
+            background: #e2e8f0;
+        }
+        .status-warning {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+        .status-urgent {
+            background: #fecaca;
+            color: #991b1b;
+        }
+        .device-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .small-btn {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
+        .footer-note {
+            font-size: 0.7rem;
+            text-align: center;
+            color: #94a3b8;
+            margin-top: 20px;
+        }
+        @media (max-width: 550px) {
+            .form-row { flex-direction: column; align-items: stretch; }
+            .device-item { flex-direction: column; align-items: flex-start; }
+            .device-actions { align-self: flex-end; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1>📋 设备校验提醒器</h1>
+        <div class="sub">✅ 提前30天高亮提醒 · 数据保存在手机本地</div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>设备名称</label>
+                <input type="text" id="deviceName" placeholder="例：高压灭菌锅" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>下次校验日期</label>
+                <input type="date" id="nextCalDate">
+            </div>
+            <button id="addBtn">➕ 添加设备</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="margin:0;">📌 设备清单</h3>
+            <button id="clearAllBtn" class="btn-outline" style="padding:6px 12px;">清空全部</button>
+        </div>
+        <div id="deviceListContainer" class="device-list">
+            <div class="empty">暂无设备，请在上方添加 ⬆️</div>
+        </div>
+    </div>
+    <div class="footer-note">
+        ⏰ 距离校验日 ≤30天 显示橙色预警， ≤7天 红色预警。<br>
+        数据自动保存在浏览器中，关闭页面不丢失。<br>
+        📱 可添加到主屏幕使用 → 点击浏览器菜单 → “添加到主屏幕”
+    </div>
+</div>
+
+<script>
+    // ---------- 存储key ----------
+    const STORAGE_KEY = 'device_calibration_list';
+
+    // ---------- 工具函数 ----------
+    function getDevices() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        try {
+            return JSON.parse(raw);
+        } catch(e) { return []; }
+    }
+
+    function saveDevices(devices) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(devices));
+    }
+
+    // 计算距离校验日的天数 (负数表示已过期)
+    function getDaysDiff(dateStr) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const target = new Date(dateStr);
+        target.setHours(0, 0, 0, 0);
+        const diffTime = target - today;
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    // 判断提醒等级: 'normal', 'warning'(<=30天), 'urgent'(<=7天)
+    function getRemindLevel(daysDiff) {
+        if (daysDiff <= 7 && daysDiff >= 0) return 'urgent';
+        if (daysDiff <= 30 && daysDiff >= 0) return 'warning';
+        return 'normal';
+    }
+
+    // 格式化日期显示
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    // 渲染设备列表
+    function renderList() {
+        const devices = getDevices();
+        const container = document.getElementById('deviceListContainer');
+        if (!devices.length) {
+            container.innerHTML = '<div class="empty">✨ 暂无设备，请在上方添加 ✨</div>';
+            return;
+        }
+
+        // 按校验日期排序（从近到远）
+        const sorted = [...devices].sort((a,b) => new Date(a.date) - new Date(b.date));
+
+        container.innerHTML = '';
+        sorted.forEach((device, originalIndex) => {
+            // 找到在原数组中的索引，用于删除/编辑
+            const realIndex = devices.findIndex(d => d.id === device.id);
+            const days = getDaysDiff(device.date);
+            const level = getRemindLevel(days);
+            
+            let statusText = '';
+            let statusClass = '';
+            if (days < 0) {
+                statusText = `⚠️ 已过期 ${Math.abs(days)} 天`;
+                statusClass = 'status-urgent';
+            } else if (level === 'urgent') {
+                statusText = `🔴 紧急！仅剩 ${days} 天`;
+                statusClass = 'status-urgent';
+            } else if (level === 'warning') {
+                statusText = `🟠 即将到期 (剩 ${days} 天)`;
+                statusClass = 'status-warning';
+            } else {
+                statusText = `✅ 剩余 ${days} 天`;
+                statusClass = '';
+            }
+
+            const itemDiv = document.createElement('div');
+            itemDiv.className = `device-item ${level === 'urgent' ? 'urgent' : (level === 'warning' ? 'warning' : '')}`;
+            
+            itemDiv.innerHTML = `
+                <div class="device-info">
+                    <div class="device-name">🔧 ${escapeHtml(device.name)}</div>
+                    <div class="device-date">📅 校验日期：${formatDate(device.date)}</div>
+                </div>
+                <div class="device-status ${statusClass}">${statusText}</div>
+                <div class="device-actions">
+                    <button class="small-btn edit-btn" data-id="${device.id}">✏️ 改期</button>
+                    <button class="small-btn btn-danger delete-btn" data-id="${device.id}">🗑️ 删除</button>
+                </div>
+            `;
+            container.appendChild(itemDiv);
+        });
+
+        // 绑定动态按钮事件
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.getAttribute('data-id');
+                deleteDeviceById(id);
+            });
+        });
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.getAttribute('data-id');
+                editDeviceDate(id);
+            });
+        });
+    }
+
+    function deleteDeviceById(id) {
+        let devices = getDevices();
+        const newDevices = devices.filter(d => d.id !== id);
+        if (confirm('确定要删除这个设备吗？')) {
+            saveDevices(newDevices);
+            renderList();
+        }
+    }
+
+    function editDeviceDate(id) {
+        let devices = getDevices();
+        const device = devices.find(d => d.id === id);
+        if (!device) return;
+        const newDate = prompt(`请输入 ${device.name} 的新校验日期 (格式: YYYY-MM-DD)`, device.date);
+        if (newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+            device.date = newDate;
+            saveDevices(devices);
+            renderList();
+        } else if (newDate) {
+            alert('日期格式错误，请使用 YYYY-MM-DD 格式');
+        }
+    }
+
+    // 简单防XSS
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // 添加设备
+    function addDevice() {
+        const nameInput = document.getElementById('deviceName');
+        const dateInput = document.getElementById('nextCalDate');
+        const name = nameInput.value.trim();
+        const date = dateInput.value;
+
+        if (!name) {
+            alert('请填写设备名称');
+            return;
+        }
+        if (!date) {
+            alert('请选择校验日期');
+            return;
+        }
+
+        const devices = getDevices();
+        // 检查重名（可选提醒，但不强制）
+        const exists = devices.some(d => d.name === name);
+        if (exists) {
+            if (!confirm(`设备“${name}”已存在，是否继续添加？`)) return;
+        }
+
+        const newDevice = {
+            id: Date.now() + '-' + Math.random().toString(36).substr(2, 6),
+            name: name,
+            date: date
+        };
+        devices.push(newDevice);
+        saveDevices(devices);
+        
+        // 清空输入
+        nameInput.value = '';
+        dateInput.value = '';
+        renderList();
+    }
+
+    function clearAllDevices() {
+        if (confirm('⚠️ 确定要删除所有设备吗？不可撤销。')) {
+            saveDevices([]);
+            renderList();
+        }
+    }
+
+    // 检查是否有即将到期的设备，并在页面加载时弹窗提醒 (可选)
+    function checkAndNotifyOnLoad() {
+        const devices = getDevices();
+        const soonDevices = devices.filter(dev => {
+            const days = getDaysDiff(dev.date);
+            return days >= 0 && days <= 30;
+        });
+        if (soonDevices.length > 0) {
+            const names = soonDevices.map(d => `${d.name} (剩${getDaysDiff(d.date)}天)`).join('、');
+            setTimeout(() => {
+                alert(`⏰ 提醒：以下设备即将到期或已临近30天：\n${names}`);
+            }, 500);
+        }
+    }
+
+    // ---------- 初始化 & 事件绑定 ----------
+    document.getElementById('addBtn').addEventListener('click', addDevice);
+    document.getElementById('clearAllBtn').addEventListener('click', clearAllDevices);
+    
+    // 初始渲染
+    renderList();
+    checkAndNotifyOnLoad();
+
+    // 注册 Service Worker (PWA 离线支持)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+            console.log('Service Worker 注册成功', reg);
+        }).catch(err => {
+            console.log('Service Worker 注册失败', err);
+        });
+    }
+</script>
+</body>
+</html>
