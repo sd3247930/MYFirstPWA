@@ -190,7 +190,7 @@
                 <label>下次校验日期</label>
                 <input type="date" id="nextCalDate">
             </div>
-            <button id="addBtn">➕ 添加设备</button>
+            <button id="installAppBtn" style="display: none; background: #4f46e5; margin-bottom: 12px;">📱 安装应用到手机桌面</button>
         </div>
     </div>
 
@@ -427,5 +427,30 @@
         });
     }
 </script>
+// 手动安装PWA
+	let deferredPrompt;
+	const installBtn = document.getElementById('installAppBtn');
+
+	window.addEventListener('beforeinstallprompt', (e) => {
+ 	 // 阻止浏览器默认的安装提示
+  		e.preventDefault();
+  		// 保存事件以供后续使用
+  		deferredPrompt = e;
+  		// 显示你自定义的安装按钮
+  		installBtn.style.display = 'block';
+	});
+
+	installBtn.addEventListener('click', async () => {
+  		if (!deferredPrompt) return;
+  		// 显示安装提示
+  		deferredPrompt.prompt();
+  		// 等待用户对提示的响应
+  		const { outcome } = await deferredPrompt.userChoice;
+  		console.log(`用户响应: ${outcome}`);
+  		// 无论结果如何，都将deferredPrompt置空，避免重复使用
+  		deferredPrompt = null;
+  		// 隐藏安装按钮
+  		installBtn.style.display = 'none';
+	});
 </body>
 </html>
