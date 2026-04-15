@@ -1,10 +1,11 @@
 const CACHE_NAME = 'device-cal-v1';
+// 将 '/' 改为 '/MYFirstPWA/'，并确保 index.html 和 manifest.json 的路径也正确
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  '/MYFirstPWA/',
+  '/MYFirstPWA/index.html',
+  '/MYFirstPWA/manifest.json'
 ];
-
+// ... 其余代码保持不变
 // 安装阶段缓存核心文件
 self.addEventListener('install', event => {
   event.waitUntil(

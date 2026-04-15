@@ -2,19 +2,19 @@
   "name": "设备校验提醒器",
   "short_name": "校验提醒",
   "description": "设备校验日期管理工具，提前预警",
-  "start_url": "/",
+  "start_url": "/MYFirstPWA/",
   "display": "standalone",
   "theme_color": "#3b82f6",
   "background_color": "#f0f4f8",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/MYFirstPWA/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "/MYFirstPWA/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
