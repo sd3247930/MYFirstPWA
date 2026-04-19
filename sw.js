@@ -1,11 +1,13 @@
 const CACHE_NAME = 'device-cal-v1';
-// 确保路径与你的部署目录一致
+// 注意：部署在子目录 /MYFirstPWA/ 下
 const urlsToCache = [
   '/MYFirstPWA/',
   '/MYFirstPWA/index.html',
-  '/MYFirstPWA/manifest.json'
+  '/MYFirstPWA/manifest.json',
+  '/MYFirstPWA/icon-192.png',
+  '/MYFirstPWA/icon-512.png'
 ];
-
+// ... 其余代码保持不变
 // 安装阶段缓存核心文件
 self.addEventListener('install', event => {
   event.waitUntil(
