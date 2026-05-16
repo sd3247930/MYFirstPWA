@@ -3,17 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>设备校验提醒器</title>
-    <!-- PWA 相关 -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#3b82f6">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="校验提醒">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <!-- 确保 manifest 路径正确 -->
-    <link rel="manifest" href="/MYFirstPWA/manifest.json">
+    <title>设备校验提醒工具</title>
     <style>
         * {
             box-sizing: border-box;
@@ -176,29 +166,14 @@
             .device-item { flex-direction: column; align-items: flex-start; }
             .device-actions { align-self: flex-end; }
         }
-	/* 新增安装按钮样式 */
-        #installBtn {
-            background: #4f46e5;
-            color: white;
-            border: none;
-            width: 100%;
-            font-size: 1rem;
-            padding: 12px;
-            margin: 10px 0;
-            display: none;
-        }
-        #installBtn:hover {
-            background: #4338ca;
-        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="card">
         <h1>📋 设备校验提醒器</h1>
-        <!-- 安装按钮位置 -->
-        <button id="installBtn" class="btn-outline">📲 安装应用到桌面</button>
-        <div class="sub">✅ 提前30天高亮提醒 · 数据保存在手机本地</div>
+        <div class="sub">✅ 提前30天高亮提醒 · 数据保存在手机/电脑本地</div>
+
         <div class="form-row">
             <div class="form-group">
                 <label>设备名称</label>
@@ -208,7 +183,7 @@
                 <label>下次校验日期</label>
                 <input type="date" id="nextCalDate">
             </div>
-            <button id="installAppBtn" style="display: none; background: #4f46e5; margin-bottom: 12px;">📱 安装应用到手机桌面</button>
+            <button id="addBtn">➕ 添加设备</button>
         </div>
     </div>
 
@@ -223,8 +198,7 @@
     </div>
     <div class="footer-note">
         ⏰ 距离校验日 ≤30天 显示橙色预警， ≤7天 红色预警。<br>
-        数据自动保存在浏览器中，关闭页面不丢失。<br>
-        📱 可添加到主屏幕使用 → 点击浏览器菜单 → “添加到主屏幕”
+        数据自动保存在浏览器中，关闭页面不丢失。
     </div>
 </div>
 
@@ -436,41 +410,7 @@
     renderList();
     checkAndNotifyOnLoad();
 
-    // 注册 Service Worker (PWA 离线支持)
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').then(reg => {
-            console.log('Service Worker 注册成功', reg);
-        }).catch(err => {
-            console.log('Service Worker 注册失败', err);
-        });
-    }
-<script>
-   // ---------- PWA 安装按钮逻辑 ----------
-    let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        if (installBtn) installBtn.style.display = 'block';
-    });
-    if (installBtn) {
-        installBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) {
-                if (/iPhone|iPad|iPod|HarmonyOS/i.test(navigator.userAgent)) {
-                    alert('请点击浏览器分享菜单，选择“添加到主屏幕”');
-                } else {
-                    alert('您的浏览器暂不支持自动安装，请使用浏览器菜单手动添加');
-                }
-                return;
-            }
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            deferredPrompt = null;
-            installBtn.style.display = 'none';
-        });
-    }
-    window.addEventListener('appinstalled', () => {
-        if (installBtn) installBtn.style.display = 'none';
-    });
-</script></body>
+    // 可选：每天第一次打开或日期变更时提醒（无额外操作，依靠每次刷新页面提醒）
+</script>
+</body>
 </html>
